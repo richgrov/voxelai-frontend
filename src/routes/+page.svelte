@@ -20,6 +20,5 @@
 		background: url('background.png');
 		background-size: 50%;
 		height: 100%;
-		margin: 0;
 	}
 </style>
