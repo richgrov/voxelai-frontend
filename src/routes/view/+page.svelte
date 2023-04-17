@@ -39,7 +39,7 @@
 		for (let x = 0; x < schem.xSize; x++) {
 			for (let y = 0; y < schem.ySize; y++) {
 				for (let z = 0; z < schem.zSize; z++) {
-					const id = Math.floor(Math.random() * 7);
+					const id = Math.floor(Math.random() * 6);
 					schem.set(x, y, z, id);
 				}
 			}
