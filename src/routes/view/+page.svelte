@@ -90,16 +90,16 @@
 						const [startU, endU, startV, endV] = calculateUv(blockInfo.uv(data, '-x'));
 						positions.push(x, y, z, x, y + 1, z + 1, x, y + 1, z);
 						positions.push(x, y, z + 1, x, y + 1, z + 1, x, y, z);
-						uv.push(startU, startV, endU, endV, endU, startV);
-						uv.push(startU, endV, endU, endV, startU, startV);
+						uv.push(startU, endV, endU, startV, startU, startV);
+						uv.push(endU, endV, endU, startV, startU, endV);
 					}
 					
 					if (x === schematic.xSize - 1 || !schematic.has(x + 1, y, z)) {
 						const [startU, endU, startV, endV] = calculateUv(blockInfo.uv(data, '+x'));
 						positions.push(x + 1, y, z, x + 1, y + 1, z, x + 1, y + 1, z + 1);
 						positions.push(x + 1, y, z, x + 1, y + 1, z + 1, x + 1, y, z + 1);
-						uv.push(startU, startV, endU, startV, endU, endV);
-						uv.push(startU, startV, endU, endV, startU, endV);
+						uv.push(endU, endV, endU, startV, startU, startV);
+						uv.push(endU, endV, startU, startV, startU, endV);
 					}
 					
 					if (y === 0 || !schematic.has(x, y - 1, z)) {
@@ -122,16 +122,16 @@
 						const [startU, endU, startV, endV] = calculateUv(blockInfo.uv(data, '-z'));
 						positions.push(x, y, z, x + 1, y + 1, z, x + 1, y, z);
 						positions.push(x, y + 1, z, x + 1, y + 1, z, x, y, z);
-						uv.push(startU, startV, endU, endV, endU, startV);
-						uv.push(startU, endV, endU, endV, startU, startV);
+						uv.push(endU, endV, startU, startV, startU, endV);
+						uv.push(endU, startV, startU, startV, endU, endV);
 					}
 					
 					if (z === schematic.zSize - 1 || !schematic.has(x, y, z + 1)) {
 						const [startU, endU, startV, endV] = calculateUv(blockInfo.uv(data, '+z'));
 						positions.push(x, y, z + 1, x + 1, y, z + 1, x + 1, y + 1, z + 1);
 						positions.push(x, y, z + 1, x + 1, y + 1, z + 1, x, y + 1, z + 1);
-						uv.push(startU, startV, endU, startV, endU, endV);
-						uv.push(startU, startV, endU, endV, startU, endV);
+						uv.push(startU, endV, endU, endV, endU, startV);
+						uv.push(startU, endV, endU, startV, startU, startV);
 					}
 				}
 			}
