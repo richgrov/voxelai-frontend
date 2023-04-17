@@ -7,6 +7,10 @@ export default class Schematic {
 		this.data = new Array(this.blocks.length).fill(0);
 	}
 
+	has(x: number, y: number, z: number): boolean {
+		return this.blocks[this.getIndex(x, y, z)] !== 0;
+	}
+
 	get(x: number, y: number, z: number): [number, number] {
 		const index = this.getIndex(x, y, z);
 		return [

@@ -62,6 +62,16 @@
 		}
 	});
 
+	function calculateUv(tileUv: [number, number]): [number, number, number, number] {
+		const textureIncrement = 1 / 16;
+		return [
+			textureIncrement * tileUv[0],
+			textureIncrement * (tileUv[0] + 1),
+			1 - textureIncrement * tileUv[1],
+			1 - textureIncrement * (tileUv[1] + 1),
+		];
+	}
+
 	function buildMesh(schematic: Schematic, material: THREE.Material): THREE.Mesh {
 		const geometry = new THREE.BufferGeometry();
 		const positions = new Array<number>();
@@ -76,48 +86,53 @@
 						continue;
 					}
 
-					const [blockU, blockV] = blockInfo.uv(0, 0);
-					const textureIncrement = 1 / 16;
-					const startU = textureIncrement * blockU;
-					const endU = textureIncrement * (blockU + 1);
-					const startV = 1 - textureIncrement * blockV;
-					const endV = 1 - textureIncrement * (blockV + 1);
-
-					// -X
-					positions.push(x, y, z, x, y + 1, z + 1, x, y + 1, z);
-					positions.push(x, y, z + 1, x, y + 1, z + 1, x, y, z);
-					uv.push(startU, startV, endU, endV, endU, startV);
-					uv.push(startU, endV, endU, endV, startU, startV);
-
-					// +X
-					positions.push(x + 1, y, z, x + 1, y + 1, z, x + 1, y + 1, z + 1);
-					positions.push(x + 1, y, z, x + 1, y + 1, z + 1, x + 1, y, z + 1);
-					uv.push(startU, startV, endU, startV, endU, endV);
-					uv.push(startU, startV, endU, endV, startU, endV);
-
-					// -Y
-					positions.push(x, y, z, x + 1, y, z, x + 1, y, z + 1);
-					positions.push(x, y, z, x + 1, y, z + 1, x, y, z + 1);
-					uv.push(startU, startV, endU, startV, endU, endV);
-					uv.push(startU, startV, endU, endV, startU, endV);
-
-					// +Y
-					positions.push(x, y + 1, z, x + 1, y + 1, z + 1, x + 1, y + 1, z);
-					positions.push(x, y + 1, z + 1, x + 1, y + 1, z + 1, x, y + 1, z);
-					uv.push(startU, startV, endU, endV, endU, startV);
-					uv.push(startU, endV, endU, endV, startU, startV);
-
-					// -Z
-					positions.push(x, y, z, x + 1, y + 1, z, x + 1, y, z);
-					positions.push(x, y + 1, z, x + 1, y + 1, z, x, y, z);
-					uv.push(startU, startV, endU, endV, endU, startV);
-					uv.push(startU, endV, endU, endV, startU, startV);
-
-					// +Z
-					positions.push(x, y, z + 1, x + 1, y, z + 1, x + 1, y + 1, z + 1);
-					positions.push(x, y, z + 1, x + 1, y + 1, z + 1, x, y + 1, z + 1);
-					uv.push(startU, startV, endU, startV, endU, endV);
-					uv.push(startU, startV, endU, endV, startU, endV);
+					if (x === 0 || !schematic.has(x - 1, y, z)) {
+						const [startU, endU, startV, endV] = calculateUv(blockInfo.uv(data, '-x'));
+						positions.push(x, y, z, x, y + 1, z + 1, x, y + 1, z);
+						positions.push(x, y, z + 1, x, y + 1, z + 1, x, y, z);
+						uv.push(startU, startV, endU, endV, endU, startV);
+						uv.push(startU, endV, endU, endV, startU, startV);
+					}
+					
+					if (x === schematic.xSize - 1 || !schematic.has(x + 1, y, z)) {
+						const [startU, endU, startV, endV] = calculateUv(blockInfo.uv(data, '+x'));
+						positions.push(x + 1, y, z, x + 1, y + 1, z, x + 1, y + 1, z + 1);
+						positions.push(x + 1, y, z, x + 1, y + 1, z + 1, x + 1, y, z + 1);
+						uv.push(startU, startV, endU, startV, endU, endV);
+						uv.push(startU, startV, endU, endV, startU, endV);
+					}
+					
+					if (y === 0 || !schematic.has(x, y - 1, z)) {
+						const [startU, endU, startV, endV] = calculateUv(blockInfo.uv(data, '-y'));
+						positions.push(x, y, z, x + 1, y, z, x + 1, y, z + 1);
+						positions.push(x, y, z, x + 1, y, z + 1, x, y, z + 1);
+						uv.push(startU, startV, endU, startV, endU, endV);
+						uv.push(startU, startV, endU, endV, startU, endV);
+					}
+					
+					if (y === schematic.ySize - 1 || !schematic.has(x, y + 1, z)) {
+						const [startU, endU, startV, endV] = calculateUv(blockInfo.uv(data, '+y'));
+						positions.push(x, y + 1, z, x + 1, y + 1, z + 1, x + 1, y + 1, z);
+						positions.push(x, y + 1, z + 1, x + 1, y + 1, z + 1, x, y + 1, z);
+						uv.push(startU, startV, endU, endV, endU, startV);
+						uv.push(startU, endV, endU, endV, startU, startV);
+					}
+					
+					if (z === 0 || !schematic.has(x, y, z - 1)) {
+						const [startU, endU, startV, endV] = calculateUv(blockInfo.uv(data, '-z'));
+						positions.push(x, y, z, x + 1, y + 1, z, x + 1, y, z);
+						positions.push(x, y + 1, z, x + 1, y + 1, z, x, y, z);
+						uv.push(startU, startV, endU, endV, endU, startV);
+						uv.push(startU, endV, endU, endV, startU, startV);
+					}
+					
+					if (z === schematic.zSize - 1 || !schematic.has(x, y, z + 1)) {
+						const [startU, endU, startV, endV] = calculateUv(blockInfo.uv(data, '+z'));
+						positions.push(x, y, z + 1, x + 1, y, z + 1, x + 1, y + 1, z + 1);
+						positions.push(x, y, z + 1, x + 1, y + 1, z + 1, x, y + 1, z + 1);
+						uv.push(startU, startV, endU, startV, endU, endV);
+						uv.push(startU, startV, endU, endV, startU, endV);
+					}
 				}
 			}
 		}
