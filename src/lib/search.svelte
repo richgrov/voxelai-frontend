@@ -2,11 +2,14 @@
 	import IconHammer from '~icons/fa6-solid/hammer';
 
 	let textElement: HTMLInputElement;
+	export let onSubmit: (query: string) => void;
 
 	function submit() {
 		if (!textElement.value) {
 			return;
 		}
+
+		onSubmit(textElement.value);
 	}
 </script>
 
