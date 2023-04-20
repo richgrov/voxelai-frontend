@@ -4,12 +4,21 @@
 	import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 	import Schematic from '../world/schematic';
 	import blocks from '../world/block';
+	import * as NBT from 'nbtify';
 
+	export let schematicUrl: string;
 	let canvasContainer: Element;
 
-	onMount(() => {
+	onMount(async () => {
+		const schematic = await fetch(schematicUrl)
+			.then(response => response.arrayBuffer())
+			.then(buf => NBT.read(buf))
+			.then(nbt => nbt.data);
+
+		console.log(schematic);
+
 		const renderer = new THREE.WebGLRenderer();
-		renderer.setSize(window.innerWidth, window.innerHeight);
+		renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
 		canvasContainer.appendChild(renderer.domElement);
 
 		const scene = new THREE.Scene();
@@ -34,17 +43,9 @@
 
 		material.map = terrain;
 
-		const schem = new Schematic(64, 64, 64);
-		for (let x = 0; x < schem.xSize; x++) {
-			for (let y = 0; y < schem.ySize; y++) {
-				for (let z = 0; z < schem.zSize; z++) {
-					const id = Math.floor(Math.random() * 96);
-					if (id !== 36) {
-						schem.set(x, y, z, id);
-					}
-				}
-			}
-		}
+		const schem = new Schematic(schematic['Width'], schematic['Height'], schematic['Length']);
+		schem.blocks = schematic['Blocks'];
+		schem.data = schematic['Data'];
 
 		const mesh = buildMesh(schem, material);
 		mesh.position.sub(new THREE.Vector3(schem.xSize / 2, schem.ySize / 2, schem.zSize / 2));
@@ -139,5 +140,5 @@
 	}
 </script>
 
-<div bind:this={canvasContainer}></div>
+<div bind:this={canvasContainer} class="w-full h-full"></div>
 

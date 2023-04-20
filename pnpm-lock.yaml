@@ -8,6 +8,7 @@ specifiers:
   '@types/three': ^0.149.0
   autoprefixer: ^10.4.14
   firebase: ^9.19.1
+  nbtify: ^1.20.1
   postcss: ^8.4.21
   svelte: ^3.54.0
   svelte-check: ^3.0.1
@@ -20,6 +21,7 @@ specifiers:
 
 dependencies:
   firebase: 9.20.0
+  nbtify: 1.20.1
   three: 0.150.1
 
 devDependencies:
@@ -1591,6 +1593,10 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
     dev: true
+
+  /nbtify/1.20.1:
+    resolution: {integrity: sha512-Rgcf1TmsmImhwhdJsAzIBZcc+DmUlkBx7yQVa5LFJRGR1Ra6q0LI/oJqdKlra21Unpw552SbkjFc0GxM0RU5VQ==}
+    dev: false
 
   /node-fetch/2.6.7:
     resolution: {integrity: sha512-ZjMPFEfVx5j+y2yF35Kzx5sF7kDzxuDj6ziH4FFbOp87zKDZNx8yExJIb05OGF4Nlt9IHFIMBkRl41VdvcNdbQ==}
