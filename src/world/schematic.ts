@@ -26,6 +26,6 @@ export default class Schematic {
 	}
 
 	getIndex(x: number, y: number, z: number): number {
-		return (y * this.ySize + z) * this.xSize + x;
+		return (y * this.zSize + z) * this.xSize + x;
 	}
 }
