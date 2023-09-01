@@ -1,0 +1,48 @@
+:root, body {
+  height: 80%;
+}
+
+body {
+  background: url("/assets/background.png");
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+  align-items: center;
+}
+
+h1 {
+  font-size: 4em;
+}
+
+#prompt-container {
+  width: 90%;
+  max-width: 600px;
+}
+
+#prompt-bar {
+  border: 2px solid black;
+  border-radius: 9999px;
+  box-shadow: 5px 5px black;
+  background-color: white;
+  display: flex;
+}
+
+#prompt-bar input {
+  border: none;
+  border-radius: 9999px;
+  outline: none;
+  padding: 16px 24px;
+  font-size: 1em;
+  flex-grow: 1;
+}
+
+#prompt-bar button {
+  background-color: pink;
+  border: none;
+  border-radius: 9999px;
+  box-sizing: content-box;
+  padding: 10px;
+  margin: 6px;
+  width: 24px;
+  height: 24px;
+}

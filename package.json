@@ -1,0 +1,15 @@
+{
+  "name": "constructify",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"turso dev --port 1331\" \"postcss client/css/ --dir dist/ --watch\"",
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.1",
+    "postcss": "^8.4.29",
+    "postcss-cli": "^10.1.0",
+    "typescript": "^5.0.2"
+  }
+}

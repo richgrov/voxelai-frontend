@@ -1,0 +1,22 @@
+{{define "view/index.tmpl"}}
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+	<script src="https://unpkg.com/htmx.org@1.9.5"></script>
+	<script type="module" src="/assets/viewer.js"></script>
+
+	<title>{{or .prompt "Not Found"}} - Constructify</title>
+</head>
+<body>
+	{{if .prompt}}
+		<h1>{{.prompt}}</h1>
+	{{else}}
+		<h2>Sorry, couldn't find that build</h2>
+		<a href="/">Go Home</a>
+	{{end}}
+</body>
+</html>
+{{end}}
