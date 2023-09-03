@@ -5,6 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "concurrently \"turso dev --port 1331\" \"postcss client/css/ --dir dist/ --watch\"",
+    "build": "postcss client/css/ --dir dist/",
+    "deploy:staging": "pnpm run build && fly deploy --config fly.dev.toml",
+    "deploy:production": "pnpm run build && fly deploy --config fly.prod.toml"
   },
   "devDependencies": {
     "concurrently": "^8.2.1",
