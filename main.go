@@ -13,8 +13,15 @@ func main() {
 	debug := flag.Bool("debug", false, "enable debug mode")
 	flag.Parse()
 
-	if err := loadEnv(*debug); err != nil {
-		panic(err)
+	if *debug {
+		if err := godotenv.Load(".env.local"); err != nil {
+			panic(err)
+		}
+	}
+
+	dbUrl := os.Getenv("DB_URL")
+	if dbUrl == "" {
+		panic("DB_URL not set")
 	}
 
 	db, err := sql.Open("libsql", os.Getenv("DB_URL"))
@@ -34,15 +41,17 @@ func main() {
 		panic(err)
 	}
 
-	runApp(db, logger)
-}
-
-func loadEnv(debug bool) error {
-	if debug {
-		return godotenv.Load(".env.local")
-	} else {
-		return godotenv.Load()
+	address := os.Getenv("BIND")
+	if address == "" {
+		address = "127.0.0.1"
 	}
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	runApp(db, logger, address+":"+port)
 }
 
 func createLogger(debug bool) (*zap.Logger, error) {
