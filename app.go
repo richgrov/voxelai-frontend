@@ -29,7 +29,7 @@ func (app *app) view(c *gin.Context) {
 
 	var prompt string
 	var object sql.NullString
-	switch err := app.db.QueryRow("SELECT prompt, object FROM jobs WHERE id=?", id).Scan(&prompt, &object); err {
+	switch err := app.db.QueryRow("SELECT prompt, object FROM jobs WHERE id=? LIMIT 1", id).Scan(&prompt, &object); err {
 	case nil:
 		c.HTML(http.StatusOK, "view/index.tmpl", gin.H{
 			"prompt": prompt,
