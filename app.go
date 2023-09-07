@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -94,6 +95,53 @@ func (app *app) generate(c *gin.Context) {
 	c.Data(http.StatusOK, gin.MIMEHTML, nil)
 }
 
+func (app *app) object(c *gin.Context) {
+	id := c.Query("id")
+	if len(id) == 0 {
+		c.HTML(http.StatusBadRequest, "view/error.tmpl", "Build ID is missing")
+		return
+	}
+
+	maxPollTime := time.Now().Add(2 * time.Minute)
+	for {
+		now := time.Now()
+		if now.Compare(maxPollTime) > -1 {
+			break
+		}
+
+		var status sql.NullString
+		var result sql.NullString
+		err := app.db.QueryRow("SELECT status, result FROM jobs WHERE id=? LIMIT 1", id).Scan(&status, &result)
+
+		if err != nil {
+			// No need for custom message if the row wasn't found. That is handled by
+			// /view. If the row somehow got deleted between the page load and this
+			// request, it's an internal mishap
+			app.logger.Error("query failed: ", zap.String("id", id), zap.Error(err))
+			c.HTML(http.StatusInternalServerError, "view/object.tmpl", gin.H{
+				"error": "Internal server error- Please try again later.",
+			})
+			return
+		}
+
+		switch status.String {
+		case "COMPLETED":
+			c.HTML(http.StatusOK, "view/object.tmpl", result.String)
+			return
+		case "FAILED":
+			c.HTML(http.StatusNotImplemented, "view/error.tmpl", gin.H{
+				"error": "Couldn't figure out how to make that!",
+			})
+			return
+		}
+
+		time.Sleep(2 * time.Second)
+	}
+
+	c.HTML(http.StatusGatewayTimeout, "view/error.tmpl", gin.H{
+		"error": "Build took too long to generate. Try again?",
+	})
+}
 func runApp(db *sql.DB, logger *zap.Logger) {
 	router := gin.Default()
 	router.LoadHTMLGlob("templates/*/*.tmpl")
@@ -107,6 +155,8 @@ func runApp(db *sql.DB, logger *zap.Logger) {
 	router.GET("/", app.index)
 	router.GET("/view", app.view)
 	router.POST("/generate", app.generate)
+	router.GET("/object", app.object)
+
 	address := os.Getenv("BIND")
 	if address == "" {
 		address = "127.0.0.1"

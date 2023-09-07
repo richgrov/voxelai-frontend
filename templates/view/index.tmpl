@@ -11,11 +11,13 @@
 	<title>{{or .error .prompt}} - Constructify</title>
 </head>
 <body>
-	{{if .prompt}}
-		<h1>{{.prompt}}</h1>
+	<a href="/">Go Home</a>
+	<h1 id="header">{{.prompt}}</h1>
+
+	{{if or .error .object}}
+		{{template "view/object.tmpl" .object}}
 	{{else}}
-		<h2>Sorry, couldn't find that build</h2>
-		<a href="/">Go Home</a>
+		<div id="spinner" hx-get="/object" hx-trigger="load" hx-vals='{"id": "{{.id}}"}' hx-indicator="#header" hx-target="this"></div>
 	{{end}}
 </body>
 </html>
