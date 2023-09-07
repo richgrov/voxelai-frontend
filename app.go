@@ -83,6 +83,7 @@ func (app *app) generate(c *gin.Context) {
 
 	_, err = app.db.Exec("INSERT INTO jobs (id, prompt) VALUES (?, ?)", id, prompt)
 	if err != nil {
+		app.logger.Log(zap.ErrorLevel, "exec failed", zap.Error(err))
 		c.HTML(http.StatusInternalServerError, "index/prompt.tmpl", gin.H{
 			"error": "Internal server error",
 		})
