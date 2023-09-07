@@ -72,7 +72,7 @@ func (app *app) generate(c *gin.Context) {
 	c.Data(http.StatusOK, gin.MIMEHTML, nil)
 }
 
-func runApp(db *sql.DB, logger *zap.Logger, address string) {
+func runApp(db *sql.DB, logger *zap.Logger) {
 	router := gin.Default()
 	router.LoadHTMLGlob("templates/*/*.tmpl")
 	router.Static("/assets", "assets/")
@@ -85,5 +85,14 @@ func runApp(db *sql.DB, logger *zap.Logger, address string) {
 	router.GET("/", app.index)
 	router.GET("/view", app.view)
 	router.POST("/generate", app.generate)
-	router.Run(address)
+	address := os.Getenv("BIND")
+	if address == "" {
+		address = "127.0.0.1"
+	}
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	router.Run(address + ":" + port)
 }

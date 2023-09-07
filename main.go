@@ -41,17 +41,7 @@ func main() {
 		panic(err)
 	}
 
-	address := os.Getenv("BIND")
-	if address == "" {
-		address = "127.0.0.1"
-	}
-
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-
-	runApp(db, logger, address+":"+port)
+	runApp(db, logger)
 }
 
 func createLogger(debug bool) (*zap.Logger, error) {
