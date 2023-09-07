@@ -28,19 +28,40 @@ func (app *app) view(c *gin.Context) {
 	}
 
 	var prompt string
-	var object sql.NullString
-	switch err := app.db.QueryRow("SELECT prompt, object FROM jobs WHERE id=? LIMIT 1", id).Scan(&prompt, &object); err {
-	case nil:
-		c.HTML(http.StatusOK, "view/index.tmpl", gin.H{
-			"prompt": prompt,
+	var status sql.NullString
+	var result sql.NullString
+	err := app.db.QueryRow("SELECT prompt, status, result FROM jobs WHERE id=? LIMIT 1", id).Scan(&prompt, &status, &result)
+
+	if err == sql.ErrNoRows {
+		c.HTML(http.StatusNotFound, "view/index.tmpl", gin.H{
+			"error":  "Not found",
+			"prompt": "Sorry, couldn't find that build.",
 		})
-
-	case sql.ErrNoRows:
-		c.HTML(http.StatusNotFound, "view/index.tmpl", gin.H{})
-
-	default:
-		app.logger.Error("query failed: ", zap.String("id", id), zap.Error(err))
+		return
 	}
+
+	if err != nil {
+		app.logger.Error("query failed: ", zap.String("id", id), zap.Error(err))
+		c.HTML(http.StatusInternalServerError, "view/index.tmpl", gin.H{
+			"error":  "Internal Error",
+			"prompt": "Sorry, that's our fault. Please try again later.",
+		})
+		return
+	}
+
+	if status.String == "FAILED" {
+		c.HTML(http.StatusNotImplemented, "view/index.tmpl", gin.H{
+			"prompt": "Sorry, couldn't make that",
+			"error":  "Not completable",
+		})
+		return
+	}
+
+	c.HTML(http.StatusOK, "view/index.tmpl", gin.H{
+		"prompt": prompt,
+		"object": result.String,
+		"id":     id,
+	})
 }
 
 func (app *app) generate(c *gin.Context) {
@@ -60,7 +81,7 @@ func (app *app) generate(c *gin.Context) {
 		return
 	}
 
-	_, err = app.db.Exec("INSERT INTO jobs (id, prompt, object) VALUES (?, ?, ?)", id, prompt, nil)
+	_, err = app.db.Exec("INSERT INTO jobs (id, prompt) VALUES (?, ?)", id, prompt)
 	if err != nil {
 		c.HTML(http.StatusInternalServerError, "index/prompt.tmpl", gin.H{
 			"error": "Internal server error",

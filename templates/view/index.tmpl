@@ -8,7 +8,7 @@
 	<script src="https://unpkg.com/htmx.org@1.9.5"></script>
 	<script type="module" src="/assets/viewer.js"></script>
 
-	<title>{{or .prompt "Not Found"}} - Constructify</title>
+	<title>{{or .error .prompt}} - Constructify</title>
 </head>
 <body>
 	{{if .prompt}}
