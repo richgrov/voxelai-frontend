@@ -17,7 +17,7 @@
 	{{if or .error .object}}
 		{{template "view/object.tmpl" .object}}
 	{{else}}
-		<div id="spinner" hx-get="/object" hx-trigger="load" hx-vals='{"id": "{{.id}}"}' hx-indicator="#header" hx-target="this"></div>
+		<div id="spinner" hx-get="/object" hx-trigger="load" hx-vals='{"id": "{{.id}}"}' hx-indicator="#header" hx-swap="outerHTML"></div>
 	{{end}}
 </body>
 </html>
