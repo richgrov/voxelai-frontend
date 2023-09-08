@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -12,9 +13,14 @@ import (
 	"go.uber.org/zap"
 )
 
+type constructorService interface {
+	build(id string, prompt string) (string, error)
+}
+
 type app struct {
-	db     *sql.DB
-	logger *zap.Logger
+	db          *sql.DB
+	logger      *zap.Logger
+	constructor constructorService
 }
 
 func (app *app) index(c *gin.Context) {
@@ -91,6 +97,8 @@ func (app *app) generate(c *gin.Context) {
 		return
 	}
 
+	go app.constructAndStoreResult(id, prompt)
+
 	c.Header("HX-Redirect", "/view?id="+id.String())
 	c.Data(http.StatusOK, gin.MIMEHTML, nil)
 }
@@ -142,16 +150,55 @@ func (app *app) object(c *gin.Context) {
 		"error": "Build took too long to generate. Try again?",
 	})
 }
+
+func (app *app) constructAndStoreResult(id uuid.UUID, prompt string) {
+	objectPath, err := app.constructor.build(id.String(), prompt)
+
+	var status, result string
+	if err != nil {
+		app.logger.Log(zap.ErrorLevel, "failed to generate build",
+			zap.String("id", id.String()),
+			zap.String("prompt", prompt),
+			zap.Error(err),
+		)
+
+		status = "FAILED"
+		result = err.Error()
+	} else {
+		status = "COMPLETED"
+		result = objectPath
+	}
+
+	_, err = app.db.Exec("UPDATE jobs SET status=?, result=? WHERE id=?", status, result, id.String())
+	if err != nil {
+		app.logger.Log(zap.ErrorLevel, "exec failed", zap.Error(err))
+	}
+}
+
 func runApp(db *sql.DB, logger *zap.Logger) {
 	router := gin.Default()
 	router.LoadHTMLGlob("templates/*/*.tmpl")
 	router.Static("/assets", "assets/")
 	router.Static("/dist", "dist/")
 
-	app := &app{
-		db:     db,
-		logger: logger,
+	var constructor constructorService
+	serviceEnv := os.Getenv("CONSTRUCTOR_SERVICE")
+	if serviceEnv == "mock" {
+		constructor = &mockConstructorService{}
+	} else if serviceEnv != "" {
+		constructor = &httpConstructorService{
+			url: serviceEnv,
+		}
+	} else {
+		panic("variable CONSTRUCTOR_SERVICE not set")
 	}
+
+	app := &app{
+		db:          db,
+		logger:      logger,
+		constructor: constructor,
+	}
+
 	router.GET("/", app.index)
 	router.GET("/view", app.view)
 	router.POST("/generate", app.generate)
