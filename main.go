@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+	"github.com/richgrov/constructify/app"
 	"go.uber.org/zap"
 )
 
@@ -41,7 +42,7 @@ func main() {
 		panic(err)
 	}
 
-	runApp(db, logger)
+	app.Run(db, logger)
 }
 
 func createLogger(debug bool) (*zap.Logger, error) {
