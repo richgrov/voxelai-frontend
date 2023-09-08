@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"database/sql"
@@ -147,7 +147,7 @@ func (app *app) object(c *gin.Context) {
 	}
 
 	c.HTML(http.StatusGatewayTimeout, "view/error.tmpl", gin.H{
-		"error": "Build took too long to generate. Try again?",
+		"error": "Build took too long to generate. Try something simpler?",
 	})
 }
 
@@ -175,7 +175,7 @@ func (app *app) constructAndStoreResult(id uuid.UUID, prompt string) {
 	}
 }
 
-func runApp(db *sql.DB, logger *zap.Logger) {
+func Run(db *sql.DB, logger *zap.Logger) {
 	router := gin.Default()
 	router.LoadHTMLGlob("templates/*/*.tmpl")
 	router.Static("/assets", "assets/")
