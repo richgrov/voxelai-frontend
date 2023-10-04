@@ -16,7 +16,7 @@ Generate voxel art from a prompt.
 
 - Create a `.env.local` file an add:
   - `DB_URL=<local database URL>` (most likely `http://127.0.0.1:1331`)
-- Start database & bundlers: `pnpm run dev`
+- Start database & bundlers: `pnpm run dev` (this runs `pnpm run dev:db` and `pnpm run dev:sources`. If you're on Windows, you might want to run `dev:db` separately on WSL)
 - Start web server: `go run . -debug`
 
 **Note:** Server will bind to 127.0.0.1:8080 by default unless `BIND` and
