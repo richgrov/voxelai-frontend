@@ -4,7 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"turso dev --port 1331\" \"postcss client/css/ --dir dist/ --watch\"",
+    "dev:sources": "concurrently \"postcss client/css/ --dir dist/ --watch\" \"rollup client/viewer.js --file dist/viewer.js --format iife --plugin @rollup/plugin-node-resolve --watch\"",
+    "dev:db": "turso dev --port 1331",
+    "dev": "concurrently \"pnpm run dev:sources\" \"pnpm run dev:db\"",
     "build": "postcss client/css/ --dir dist/",
     "deploy:staging": "pnpm run build && fly deploy --config fly.dev.toml",
     "deploy:production": "pnpm run build && fly deploy --config fly.prod.toml"
