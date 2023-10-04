@@ -57,6 +57,10 @@ h1 {
   height: 24px;
 }
 
+#go img {
+  margin: auto;
+}
+
 #error-dialog {
   background-color: red;
   color: white;
@@ -71,6 +75,24 @@ h1 {
 }
 
 @keyframes fadeIn {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+#go .loading {
+  display: none;
+  animation: rotate 1s infinite;
+}
+
+#go.htmx-request .loading {
+  display: inherit;
+}
+
+#go.htmx-request .hammer {
+  display: none;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
