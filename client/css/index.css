@@ -56,3 +56,21 @@ h1 {
   width: 24px;
   height: 24px;
 }
+
+#error-dialog {
+  background-color: red;
+  color: white;
+  animation: fadeIn 0.5s;
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin: 10px auto;
+  padding: 15px;
+  max-width: max-content;
+  border-radius: 5px;
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}

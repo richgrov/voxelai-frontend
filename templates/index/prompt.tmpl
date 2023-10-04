@@ -1,9 +1,5 @@
 {{define "index/prompt.tmpl"}}
 <div id="prompt-container" hx-ext="response-targets" hx-target-*="this" hx-swap="outerHTML">
-	{{if .error}}
-		<p>{{.error}}</p>
-	{{end}}
-
 	<form hx-post="/generate" id="prompt-bar">
 		<input type="text" name="prompt" placeholder="A house made of gold">
 		<button hx-indicator="#loading">
@@ -11,5 +7,9 @@
 		</button>
 		<!--<p id="#loading" class="htmx-indicator">load</p>-->
 	</form>
+
+	{{if .error}}
+		<p id="error-dialog">{{.error}}</p>
+	{{end}}
 </div>
 {{end}}
