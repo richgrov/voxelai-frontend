@@ -14,7 +14,7 @@ func (*mockConstructorService) build(id string, prompt string) (string, error) {
 		return "", errors.New("fake error")
 	}
 
-	return "/schem/stone.schematic", nil
+	return "/assets/schem/cube.glb", nil
 }
 
 type httpConstructorService struct {
