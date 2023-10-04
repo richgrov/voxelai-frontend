@@ -134,6 +134,7 @@ func (app *app) object(c *gin.Context) {
 
 		switch status.String {
 		case "COMPLETED":
+			c.Header("HX-Trigger-After-Settle", "displayMesh")
 			c.HTML(http.StatusOK, "view/object.tmpl", result.String)
 			return
 		case "FAILED":

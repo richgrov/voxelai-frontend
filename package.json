@@ -4,15 +4,22 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"turso dev --port 1331\" \"postcss client/css/ --dir dist/ --watch\"",
+    "dev:sources": "concurrently \"postcss client/css/ --dir dist/ --watch\" \"rollup client/viewer.js --file dist/viewer.js --format iife --plugin @rollup/plugin-node-resolve --watch\"",
+    "dev:db": "turso dev --port 1331",
+    "dev": "concurrently \"pnpm run dev:sources\" \"pnpm run dev:db\"",
     "build": "postcss client/css/ --dir dist/",
     "deploy:staging": "pnpm run build && fly deploy --config fly.dev.toml",
     "deploy:production": "pnpm run build && fly deploy --config fly.prod.toml"
   },
   "devDependencies": {
+    "@types/three": "^0.156.0",
     "concurrently": "^8.2.1",
     "postcss": "^8.4.29",
     "postcss-cli": "^10.1.0",
-    "typescript": "^5.0.2"
+    "rollup": "^3.29.0"
+  },
+  "dependencies": {
+    "@rollup/plugin-node-resolve": "^15.2.1",
+    "three": "^0.156.1"
   }
 }
