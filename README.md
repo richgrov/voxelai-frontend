@@ -1,6 +1,6 @@
-# Constructify
+# VoxelAI
 
-Generate Minecraft builds from a prompt.
+Generate voxel art from a prompt.
 
 # Setup
 
