@@ -1,4 +1,6 @@
 {{define "view/object.tmpl"}}
-	<a href="{{.}}">Download</a>
+	<a id="download" href="{{.}}">
+		<img src="/assets/ic/download.svg" alt="Download" width="24" height="24">
+	</a>
 	<canvas data-url="{{.}}"></canvas>
 {{end}}

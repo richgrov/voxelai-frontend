@@ -1,5 +1,6 @@
 body {
   margin: 0;
+  overflow: hidden;
 }
 
 h1 {
@@ -11,4 +12,54 @@ h1 {
 canvas {
   width: 100vw;
   height: 100vh;
+}
+
+a {
+  background-color: pink;
+  padding: 10px;
+  color: white;
+  position: fixed;
+  border-radius: 9999px;
+  width: 25px;
+  height: 25px;
+}
+
+#header {
+  position: fixed;
+  left: 50%;
+  top: 40%;
+  vertical-align: middle;
+  font-size: 60px;
+  transform: translate(-50%, -50%);
+}
+
+#header.skip {
+  animation-duration: 0s !important;
+}
+
+#header.animate {
+  animation: toSide 1s forwards;
+}
+
+@keyframes toSide {
+  from {
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  to {
+    top: 80%;
+    left: 5%;
+    transform: translate(0);
+  }
+}
+
+#home {
+  top: 20px;
+  left: 20px;
+}
+
+#download {
+  bottom: 20px;
+  left: 20px;
 }

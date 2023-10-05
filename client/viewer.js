@@ -2,7 +2,13 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-async function displayMesh() {
+async function displayMesh(skipAnimation) {
+  const header = document.querySelector("#header");
+  header.classList.add("animate");
+  if (skipAnimation) {
+    header.classList.add("skip");
+  }
+
   const canvas = document.querySelector('canvas');
   const url = canvas.getAttribute('data-url');
   const renderer = new THREE.WebGLRenderer({ canvas });
@@ -45,7 +51,7 @@ async function displayMesh() {
 document.addEventListener("displayMesh", displayMesh);
 
 if (document.readyState !== 'complete') {
-  document.addEventListener("DOMContentLoaded", displayMesh);
+  document.addEventListener("DOMContentLoaded", () => displayMesh(true));
 } else {
   displayMesh();
 }
