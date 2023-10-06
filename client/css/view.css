@@ -1,6 +1,7 @@
 body {
   margin: 0;
   overflow: hidden;
+  background-color: #333;
 }
 
 h1 {
@@ -12,6 +13,7 @@ h1 {
 canvas {
   width: 100vw;
   height: 100vh;
+  animation: fadeIn 0.5s forwards linear;
 }
 
 a {
@@ -28,9 +30,9 @@ a {
   position: fixed;
   left: 50%;
   top: 40%;
-  vertical-align: middle;
   font-size: 60px;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
+  text-shadow: 5px 5px black;
 }
 
 #header.skip {
@@ -45,13 +47,22 @@ a {
   from {
     top: 40%;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%);
   }
   to {
     top: 80%;
     left: 5%;
     transform: translate(0);
   }
+}
+
+#header img {
+  display: block;
+  margin: auto;
+}
+
+#header.animate img {
+  display: none;
 }
 
 #home {

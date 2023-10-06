@@ -2,19 +2,24 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-async function displayMesh(skipAnimation) {
+async function tryRender(skipAnimation) {
+  const canvas = document.querySelector('canvas');
+  if (!canvas) {
+    return;
+  }
+
   const header = document.querySelector("#header");
   header.classList.add("animate");
   if (skipAnimation) {
     header.classList.add("skip");
   }
 
-  const canvas = document.querySelector('canvas');
   const url = canvas.getAttribute('data-url');
   const renderer = new THREE.WebGLRenderer({ canvas });
   renderer.setSize(canvas.clientWidth, canvas.clientHeight);
 
   const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x333333);
   const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
   const controls = new OrbitControls(camera, renderer.domElement);
@@ -48,10 +53,10 @@ async function displayMesh(skipAnimation) {
   controls.addEventListener('change', () => window.requestAnimationFrame(render));
 }
 
-document.addEventListener("displayMesh", displayMesh);
+document.addEventListener("displayMesh", () => tryRender(false));
 
 if (document.readyState !== 'complete') {
-  document.addEventListener("DOMContentLoaded", () => displayMesh(true));
+  document.addEventListener("DOMContentLoaded", () => tryRender(true));
 } else {
-  displayMesh();
+  tryRender();
 }

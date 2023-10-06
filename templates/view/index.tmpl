@@ -5,6 +5,7 @@
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+	<link rel="stylesheet" href="/dist/style.css">
 	<link rel="stylesheet" href="/dist/view.css">
 
 	<script src="https://unpkg.com/htmx.org@1.9.5"></script>
@@ -13,16 +14,20 @@
 	<title>{{or .error .prompt}} - Constructify</title>
 </head>
 <body>
-	<a id="home" href="/">
-		<img src="/assets/ic/house.svg" alt="Go Home" width="24" height="24">
-	</a>
-	<h1 id="header">{{.prompt}}</h1>
-
 	{{if or .error .object}}
 		{{template "view/object.tmpl" .object}}
 	{{else}}
 		<div id="spinner" hx-get="/object" hx-trigger="load" hx-vals='{"id": "{{.id}}"}' hx-indicator="#header" hx-swap="outerHTML"></div>
 	{{end}}
+
+	<a id="home" href="/">
+		<img src="/assets/ic/house.svg" alt="Go Home" width="24" height="24">
+	</a>
+	<h1 id="header">
+		{{.prompt}}
+		<br>
+		<img class="spin" src="/assets/ic/spinner-white.svg" alt="Loading" width="24" height="24">
+	</h1>
 </body>
 </html>
 {{end}}
