@@ -14,10 +14,9 @@ async function tryRender() {
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x333333);
-  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
+  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
   const controls = new OrbitControls(camera, renderer.domElement);
-  camera.position.set(10, 10, 10);
   controls.update();
 
   const directional = new THREE.DirectionalLight(0xFFFFFF, 1);
@@ -30,7 +29,17 @@ async function tryRender() {
   const loader = new GLTFLoader();
   loader.load(url, gltf => {
     const obj = gltf.scene;
-    obj.position.set(-obj.scale.x/2, 0, -obj.scale.z/2);
+
+    const size = new THREE.Vector3();
+    new THREE.Box3()
+      .setFromObject(obj)
+      .getSize(size);
+
+    const length = size.length() / 2;
+    camera.position.set(length, length, length);
+    camera.lookAt(0, 0, 0);
+
+    obj.position.set(-size.x/2, -size.y/2, -size.z/2);
     obj.traverse(child => {
       if (child.isMesh) {
         child.material.metalness = 0;
