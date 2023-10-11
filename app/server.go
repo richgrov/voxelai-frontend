@@ -41,8 +41,9 @@ func (app *app) view(c *gin.Context) {
 
 	if err == sql.ErrNoRows {
 		c.HTML(http.StatusNotFound, "view/index.tmpl", gin.H{
-			"error":  "Not found",
-			"prompt": "Sorry, couldn't find that build.",
+			"object":        "assets/schem/404.glb",
+			"prompt":        "Sorry, couldn't find that build.",
+			"skipAnimation": true,
 		})
 		return
 	}
@@ -50,24 +51,27 @@ func (app *app) view(c *gin.Context) {
 	if err != nil {
 		app.logger.Error("query failed: ", zap.String("id", id), zap.Error(err))
 		c.HTML(http.StatusInternalServerError, "view/index.tmpl", gin.H{
-			"error":  "Internal Error",
-			"prompt": "Sorry, that's our fault. Please try again later.",
+			"object":        "assets/schem/error.glb",
+			"prompt":        "Sorry, that's our fault. Please try again later.",
+			"skipAnimation": true,
 		})
 		return
 	}
 
 	if status.String == "FAILED" {
 		c.HTML(http.StatusNotImplemented, "view/index.tmpl", gin.H{
-			"prompt": "Sorry, couldn't make that",
-			"error":  "Not completable",
+			"prompt":        "Sorry, couldn't make that. Try again later?",
+			"object":        "assets/schem/question_mark.glb",
+			"skipAnimation": true,
 		})
 		return
 	}
 
 	c.HTML(http.StatusOK, "view/index.tmpl", gin.H{
-		"prompt": prompt,
-		"object": result.String,
-		"id":     id,
+		"prompt":        prompt,
+		"object":        result.String,
+		"id":            id,
+		"skipAnimation": true,
 	})
 }
 
@@ -104,9 +108,14 @@ func (app *app) generate(c *gin.Context) {
 }
 
 func (app *app) object(c *gin.Context) {
+	c.Header("HX-Trigger-After-Settle", "displayMesh")
+
 	id := c.Query("id")
 	if len(id) == 0 {
-		c.HTML(http.StatusBadRequest, "view/error.tmpl", "Build ID is missing")
+		c.HTML(http.StatusBadRequest, "view/object.tmpl", gin.H{
+			"object": "assets/schem/error.glb",
+			"prompt": "Build ID is missing",
+		})
 		return
 	}
 
@@ -117,29 +126,31 @@ func (app *app) object(c *gin.Context) {
 			break
 		}
 
+		var prompt string
 		var status sql.NullString
 		var result sql.NullString
-		err := app.db.QueryRow("SELECT status, result FROM jobs WHERE id=? LIMIT 1", id).Scan(&status, &result)
+		err := app.db.QueryRow("SELECT prompt, status, result FROM jobs WHERE id=? LIMIT 1", id).Scan(&prompt, &status, &result)
 
 		if err != nil {
-			// No need for custom message if the row wasn't found. That is handled by
-			// /view. If the row somehow got deleted between the page load and this
-			// request, it's an internal mishap
 			app.logger.Error("query failed: ", zap.String("id", id), zap.Error(err))
 			c.HTML(http.StatusInternalServerError, "view/object.tmpl", gin.H{
-				"error": "Internal server error- Please try again later.",
+				"object": "assets/schem/error.glb",
+				"prompt": "Sorry, that's our fault. Please try again later.",
 			})
 			return
 		}
 
 		switch status.String {
 		case "COMPLETED":
-			c.Header("HX-Trigger-After-Settle", "displayMesh")
-			c.HTML(http.StatusOK, "view/object.tmpl", result.String)
+			c.HTML(http.StatusOK, "view/object.tmpl", gin.H{
+				"object": result.String,
+				"prompt": prompt,
+			})
 			return
 		case "FAILED":
-			c.HTML(http.StatusNotImplemented, "view/error.tmpl", gin.H{
-				"error": "Couldn't figure out how to make that!",
+			c.HTML(http.StatusNotImplemented, "view/object.tmpl", gin.H{
+				"prompt": "Sorry, couldn't make that. Try again later?",
+				"object": "assets/schem/question_mark.glb",
 			})
 			return
 		}
@@ -147,8 +158,9 @@ func (app *app) object(c *gin.Context) {
 		time.Sleep(2 * time.Second)
 	}
 
-	c.HTML(http.StatusGatewayTimeout, "view/error.tmpl", gin.H{
-		"error": "Build took too long to generate. Try something simpler?",
+	c.HTML(http.StatusGatewayTimeout, "view/object.tmpl", gin.H{
+		"prompt": "Took too long to generate. Try something simpler?",
+		"object": "assets/schem/x.glb",
 	})
 }
 

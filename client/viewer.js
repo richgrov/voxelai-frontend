@@ -2,16 +2,10 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-async function tryRender(skipAnimation) {
+async function tryRender() {
   const canvas = document.querySelector('canvas');
   if (!canvas) {
     return;
-  }
-
-  const header = document.querySelector("#header");
-  header.classList.add("animate");
-  if (skipAnimation) {
-    header.classList.add("skip");
   }
 
   const url = canvas.getAttribute('data-url');
@@ -53,10 +47,10 @@ async function tryRender(skipAnimation) {
   controls.addEventListener('change', () => window.requestAnimationFrame(render));
 }
 
-document.addEventListener("displayMesh", () => tryRender(false));
+document.addEventListener("displayMesh", tryRender);
 
 if (document.readyState !== 'complete') {
-  document.addEventListener("DOMContentLoaded", () => tryRender(true));
+  document.addEventListener("DOMContentLoaded", tryRender);
 } else {
   tryRender();
 }

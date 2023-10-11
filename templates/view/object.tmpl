@@ -1,6 +1,18 @@
 {{define "view/object.tmpl"}}
-	<canvas data-url="{{.}}"></canvas>
-	<a id="download" href="{{.}}">
-		<img src="/assets/ic/download.svg" alt="Download" width="24" height="24">
-	</a>
+	{{if .object}}
+		<canvas data-url="{{.object}}"></canvas>
+		<a id="download" href="{{.object}}">
+			<img src="/assets/ic/download.svg" alt="Download" width="24" height="24">
+		</a>
+	{{end}}
+
+	<h1 id="header"
+		{{if .object}}
+			class="animate {{if .skipAnimation}} skip-animation {{end}}"
+		{{end}}
+	>
+		{{.prompt}}
+		<br>
+		<img id="loading" class="spin" src="/assets/ic/spinner-white.svg" alt="Loading" width="24" height="24">
+	</h1>
 {{end}}

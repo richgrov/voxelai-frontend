@@ -9,25 +9,33 @@
 	<link rel="stylesheet" href="/dist/view.css">
 
 	<script src="https://unpkg.com/htmx.org@1.9.5"></script>
+	<script src="https://unpkg.com/htmx.org/dist/ext/response-targets.js"></script>
 	<script src="/dist/viewer.js"></script>
 
-	<title>{{or .error .prompt}} - Constructify</title>
+	<title>{{.prompt}} - Constructify</title>
 </head>
 <body>
-	{{if or .error .object}}
-		{{template "view/object.tmpl" .object}}
-	{{else}}
-		<div id="spinner" hx-get="/object" hx-trigger="load" hx-vals='{"id": "{{.id}}"}' hx-indicator="#header" hx-swap="outerHTML"></div>
+	{{if not .object}}
+		<div
+			hx-ext="response-targets"
+			hx-get="/object"
+			hx-trigger="load"
+			hx-vals='{"id": "{{.id}}"}'
+			hx-swap="outerHTML"
+			hx-target-*="this"
+			hx-indicator="#loading"
+		>
+	{{end}}
+
+	{{template "view/object.tmpl" .}}
+	
+	{{if not .object}}
+		</div>
 	{{end}}
 
 	<a id="home" href="/">
 		<img src="/assets/ic/house.svg" alt="Go Home" width="24" height="24">
 	</a>
-	<h1 id="header">
-		{{.prompt}}
-		<br>
-		<img class="spin" src="/assets/ic/spinner-white.svg" alt="Loading" width="24" height="24">
-	</h1>
 </body>
 </html>
 {{end}}

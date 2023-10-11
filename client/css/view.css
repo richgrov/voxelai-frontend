@@ -35,10 +35,6 @@ a {
   text-shadow: 5px 5px black;
 }
 
-#header.skip {
-  animation-duration: 0s !important;
-}
-
 #header.animate {
   animation: toSide 1s forwards;
 }
@@ -56,13 +52,13 @@ a {
   }
 }
 
-#header img {
-  display: block;
+#loading {
+  display: none;
   margin: auto;
 }
 
-#header.animate img {
-  display: none;
+#loading.htmx-request {
+  display: block;
 }
 
 #home {
