@@ -2,14 +2,16 @@ package app
 
 import (
 	"errors"
-	"io/ioutil"
+	"io"
 	"math/rand"
 	"net/http"
+	"time"
 )
 
 type mockConstructorService struct{}
 
 func (*mockConstructorService) build(id string, prompt string) (string, error) {
+	time.Sleep(3 * time.Second)
 	if rand.Intn(10) == 0 {
 		return "", errors.New("fake error")
 	}
@@ -38,7 +40,7 @@ func (service *httpConstructorService) build(id string, prompt string) (string, 
 		return "", err
 	}
 
-	result, err := ioutil.ReadAll(res.Body)
+	result, err := io.ReadAll(res.Body)
 	if err != nil {
 		return "", err
 	}
