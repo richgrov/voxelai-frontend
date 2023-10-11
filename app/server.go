@@ -61,7 +61,7 @@ func (app *app) view(c *gin.Context) {
 	if status.String == "FAILED" {
 		c.HTML(http.StatusNotImplemented, "view/index.tmpl", gin.H{
 			"prompt":        "Sorry, couldn't make that. Try again later?",
-			"object":        "assets/schem/question_mark.glb",
+			"object":        "assets/schem/x.glb",
 			"skipAnimation": true,
 		})
 		return
@@ -150,7 +150,7 @@ func (app *app) object(c *gin.Context) {
 		case "FAILED":
 			c.HTML(http.StatusNotImplemented, "view/object.tmpl", gin.H{
 				"prompt": "Sorry, couldn't make that. Try again later?",
-				"object": "assets/schem/question_mark.glb",
+				"object": "assets/schem/x.glb",
 			})
 			return
 		}
