@@ -36,7 +36,7 @@ async function tryRender() {
       .getSize(size);
 
     const length = size.length() / 2;
-    camera.position.set(length, length, length);
+    camera.position.set(length, length * 0.6, length);
     camera.lookAt(0, 0, 0);
 
     obj.position.set(-size.x/2, -size.y/2, -size.z/2);
