@@ -3,6 +3,7 @@ primary_region = "sjc"
 
 [env]
   BIND = "0.0.0.0"
+  GIN_MODE = "release"
 
 [http_service]
   internal_port = 8080
