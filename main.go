@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"flag"
 	"os"
 
@@ -25,24 +24,12 @@ func main() {
 		panic("DB_URL not set")
 	}
 
-	db, err := sql.Open("libsql", os.Getenv("DB_URL"))
-	if err != nil {
-		panic(err)
-	}
-
-	if *debug {
-		_, err = db.Exec("CREATE TABLE IF NOT EXISTS jobs (id text NOT NULL PRIMARY KEY, prompt text NOT NULL, status text, result text)")
-		if err != nil {
-			panic(err)
-		}
-	}
-
 	logger, err := createLogger(*debug)
 	if err != nil {
 		panic(err)
 	}
 
-	app.Run(db, logger)
+	app.Run(dbUrl, logger)
 }
 
 func createLogger(debug bool) (*zap.Logger, error) {

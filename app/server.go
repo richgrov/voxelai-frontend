@@ -1,7 +1,6 @@
 package app
 
 import (
-	"database/sql"
 	"net/http"
 	"os"
 	"strings"
@@ -10,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	_ "github.com/libsql/libsql-client-go/libsql"
+	"github.com/richgrov/constructify/app/jobs"
 	"go.uber.org/zap"
 )
 
@@ -18,9 +18,9 @@ type constructorService interface {
 }
 
 type app struct {
-	db          *sql.DB
 	logger      *zap.Logger
 	constructor constructorService
+	jobsManager jobs.JobService
 }
 
 func (app *app) index(c *gin.Context) {
@@ -34,12 +34,9 @@ func (app *app) view(c *gin.Context) {
 		return
 	}
 
-	var prompt string
-	var status sql.NullString
-	var result sql.NullString
-	err := app.db.QueryRow("SELECT prompt, status, result FROM jobs WHERE id=? LIMIT 1", id).Scan(&prompt, &status, &result)
+	job, err := app.jobsManager.GetJob(id)
 
-	if err == sql.ErrNoRows {
+	if job == nil {
 		c.HTML(http.StatusNotFound, "view/index.tmpl", gin.H{
 			"object":        "assets/schem/404.glb",
 			"prompt":        "Sorry, couldn't find that build.",
@@ -58,21 +55,21 @@ func (app *app) view(c *gin.Context) {
 		return
 	}
 
-	if status.String == "FAILED" {
+	switch job.Status {
+	case jobs.StatusSucceess, jobs.StatusInProgress:
+		c.HTML(http.StatusOK, "view/index.tmpl", gin.H{
+			"prompt":        job.Prompt,
+			"object":        job.Result,
+			"id":            id,
+			"skipAnimation": true,
+		})
+	case jobs.StatusFailed:
 		c.HTML(http.StatusNotImplemented, "view/index.tmpl", gin.H{
 			"prompt":        "Sorry, couldn't make that. Try again later?",
 			"object":        "assets/schem/x.glb",
 			"skipAnimation": true,
 		})
-		return
 	}
-
-	c.HTML(http.StatusOK, "view/index.tmpl", gin.H{
-		"prompt":        prompt,
-		"object":        result.String,
-		"id":            id,
-		"skipAnimation": true,
-	})
 }
 
 func (app *app) generate(c *gin.Context) {
@@ -92,7 +89,7 @@ func (app *app) generate(c *gin.Context) {
 		return
 	}
 
-	_, err = app.db.Exec("INSERT INTO jobs (id, prompt) VALUES (?, ?)", id, prompt)
+	err = app.jobsManager.StartJob(id.String(), prompt)
 	if err != nil {
 		app.logger.Log(zap.ErrorLevel, "exec failed", zap.Error(err))
 		c.HTML(http.StatusInternalServerError, "index/prompt.tmpl", gin.H{
@@ -119,76 +116,61 @@ func (app *app) object(c *gin.Context) {
 		return
 	}
 
-	maxPollTime := time.Now().Add(2 * time.Minute)
-	for {
-		now := time.Now()
-		if now.Compare(maxPollTime) > -1 {
-			break
-		}
-
-		var prompt string
-		var status sql.NullString
-		var result sql.NullString
-		err := app.db.QueryRow("SELECT prompt, status, result FROM jobs WHERE id=? LIMIT 1", id).Scan(&prompt, &status, &result)
-
-		if err != nil {
-			app.logger.Error("query failed: ", zap.String("id", id), zap.Error(err))
-			c.HTML(http.StatusInternalServerError, "view/object.tmpl", gin.H{
-				"object": "assets/schem/error.glb",
-				"prompt": "Sorry, that's our fault. Please try again later.",
-			})
-			return
-		}
-
-		switch status.String {
-		case "COMPLETED":
-			c.HTML(http.StatusOK, "view/object.tmpl", gin.H{
-				"object": result.String,
-				"prompt": prompt,
-			})
-			return
-		case "FAILED":
-			c.HTML(http.StatusNotImplemented, "view/object.tmpl", gin.H{
-				"prompt": "Sorry, couldn't make that. Try again later?",
-				"object": "assets/schem/x.glb",
-			})
-			return
-		}
-
-		time.Sleep(2 * time.Second)
+	job, err := app.jobsManager.WaitForCompletion(id, 2*time.Minute)
+	if err == jobs.ErrTimeout {
+		c.HTML(http.StatusGatewayTimeout, "view/object.tmpl", gin.H{
+			"prompt": "Took too long to generate. Try something simpler?",
+			"object": "assets/schem/x.glb",
+		})
+		return
+	} else if err != nil {
+		app.logger.Error("query failed: ", zap.String("id", id), zap.Error(err))
+		c.HTML(http.StatusInternalServerError, "view/object.tmpl", gin.H{
+			"object": "assets/schem/error.glb",
+			"prompt": "Sorry, that's our fault. Please try again later.",
+		})
+		return
 	}
 
-	c.HTML(http.StatusGatewayTimeout, "view/object.tmpl", gin.H{
-		"prompt": "Took too long to generate. Try something simpler?",
-		"object": "assets/schem/x.glb",
-	})
+	switch job.Status {
+	case jobs.StatusSucceess:
+		c.HTML(http.StatusOK, "view/object.tmpl", gin.H{
+			"object": job.Result,
+			"prompt": job.Prompt,
+		})
+	case jobs.StatusFailed:
+		c.HTML(http.StatusNotImplemented, "view/object.tmpl", gin.H{
+			"prompt": "Sorry, couldn't make that. Try again later?",
+			"object": "assets/schem/x.glb",
+		})
+	}
 }
 
 func (app *app) constructAndStoreResult(id uuid.UUID, prompt string) {
 	objectPath, err := app.constructor.build(id.String(), prompt)
 
-	var status, result string
+	var status jobs.Status
+	var result string
 	if err != nil {
 		app.logger.Log(zap.ErrorLevel, "failed to generate build",
 			zap.String("id", id.String()),
 			zap.String("prompt", prompt),
 			zap.Error(err),
 		)
-
-		status = "FAILED"
+		status = jobs.StatusFailed
 		result = err.Error()
 	} else {
-		status = "COMPLETED"
+		status = jobs.StatusSucceess
 		result = objectPath
 	}
 
-	_, err = app.db.Exec("UPDATE jobs SET status=?, result=? WHERE id=?", status, result, id.String())
+	err = app.jobsManager.UpdateJobStatus(id.String(), status, result)
 	if err != nil {
 		app.logger.Log(zap.ErrorLevel, "exec failed", zap.Error(err))
 	}
 }
 
-func Run(db *sql.DB, logger *zap.Logger) {
+func Run(dbUrl string, logger *zap.Logger) {
 	router := gin.Default()
 	router.LoadHTMLGlob("templates/*/*.tmpl")
 	router.Static("/assets", "assets/")
@@ -206,10 +188,15 @@ func Run(db *sql.DB, logger *zap.Logger) {
 		panic("variable CONSTRUCTOR_SERVICE not set")
 	}
 
+	jobService, err := jobs.NewSqlServce(dbUrl)
+	if err != nil {
+		panic(err)
+	}
+
 	app := &app{
-		db:          db,
 		logger:      logger,
 		constructor: constructor,
+		jobsManager: jobService,
 	}
 
 	router.GET("/", app.index)
