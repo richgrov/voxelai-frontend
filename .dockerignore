@@ -1,3 +1,4 @@
 **/node_modules
 fly.*.toml
 **/.git
+client
