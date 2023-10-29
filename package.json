@@ -7,9 +7,9 @@
     "dev:sources": "concurrently \"postcss client/css/ --dir dist/ --watch\" \"rollup client/viewer.js --file dist/viewer.js --format iife --plugin @rollup/plugin-node-resolve --watch\"",
     "dev:db": "turso dev --port 1331",
     "dev": "concurrently \"pnpm run dev:sources\" \"pnpm run dev:db\"",
-    "build": "postcss client/css/ --dir dist/",
-    "deploy:staging": "pnpm run build && fly deploy --config fly.dev.toml",
-    "deploy:production": "pnpm run build && fly deploy --config fly.prod.toml"
+    "build": "postcss client/css/ --dir dist/ && rollup client/viewer.js --file dist/viewer.js --format iife --plugin @rollup/plugin-node-resolve",
+    "deploy:staging": "pnpm run build && fly deploy --config fly.staging.toml",
+    "deploy:prod": "pnpm run build && fly deploy --config fly.prod.toml"
   },
   "devDependencies": {
     "@types/three": "^0.156.0",
