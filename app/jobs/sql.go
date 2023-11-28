@@ -17,7 +17,7 @@ func NewSqlServce(dbUrl string) (*SqlJobsService, error) {
 
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS jobs (id text NOT NULL PRIMARY KEY, prompt text NOT NULL, status text, result text)")
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	return &SqlJobsService{
