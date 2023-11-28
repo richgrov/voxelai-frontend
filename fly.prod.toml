@@ -1,4 +1,4 @@
-app = "constructify"
+app = "voxelai"
 primary_region = "sjc"
 
 [env]
